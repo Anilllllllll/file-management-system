@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futura File Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --secondary: #ff00ff;
+            --accent: #00ff9d;
+            --bg-dark: #0a0e17;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #a0b1c5;
+            --glow: 0 0 15px rgba(0, 212, 255, 0.5);
+            --transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-dark), #1a2332);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.1), transparent 70%);
+            z-index: -1;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+            padding: 2rem;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            position: sticky;
+            top: 2rem;
+            height: calc(100vh - 4rem);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+
+        .sidebar:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--glow);
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            margin: 5px 0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: translateX(10px);
+            box-shadow: var(--glow);
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 2rem;
+        }
+
+        .toolbar {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .breadcrumb-item {
+            padding: 8px 15px;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            transition: var(--transition);
+        }
+
+        .breadcrumb-item:hover {
+            background: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .breadcrumb-item:after {
+            content: '→';
+            margin: 0 10px;
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-item:last-child:after {
+            content: '';
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            color: var(--text-primary);
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05) rotate(2deg);
+            box-shadow: var(--glow);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+            color: var(--text-primary);
+        }
+
+        .btn-success:hover {
+            transform: scale(1.05) rotate(-2deg);
+            box-shadow: var(--glow);
+        }
+
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+
+        .file-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .file-item::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1), transparent);
+            transition: var(--transition);
+            opacity: 0;
+        }
+
+        .file-item:hover {
+            transform: translateY(-10px) rotate(1deg);
+            box-shadow: var(--glow);
+        }
+
+        .file-item:hover::before {
+            opacity: 1;
+        }
+
+        .file-icon {
+            font-size: 60px;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+            filter: drop-shadow(0 0 5px currentColor);
+        }
+
+        .file-item:hover .file-icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .file-icon.folder { color: var(--accent); }
+        .file-icon.document { color: var(--primary); }
+        .file-icon.image { color: var(--secondary); }
+        .file-icon.spreadsheet { color: #00ff9d; }
+        .file-icon.presentation { color: #ff6b6b; }
+
+        .file-name {
+            font-weight: 700;
+            margin-bottom: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+
+        .file-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .file-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            opacity: 0;
+            transition: var(--transition);
+            display: flex;
+            gap: 10px;
+        }
+
+        .file-item:hover .file-actions {
+            opacity: 1;
+        }
+
+        .file-action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-primary);
+        }
+
+        .file-action-btn:hover {
+            background: var(--primary);
+            transform: scale(1.2) rotate(360deg);
+            box-shadow: var(--glow);
+        }
+
+        .status-bar {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 20px;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            width: 500px;
+            max-width: 90%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: scale(0.8);
+            transition: var(--transition);
+            box-shadow: var(--glow);
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: var(--glow);
+            outline: none;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            padding: 3rem;
+            text-align: center;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(0, 212, 255, 0.1);
+            transform: scale(1.05);
+            box-shadow: var(--glow);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .empty-folder {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            background: var(--glass-bg);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal.active {
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(0, 212, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-folder-open"></i>P priya File Manage System
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active"><i class="fas fa-home"></i> Home</li>
+                <li class="nav-item"><i class="fas fa-file-invoice-dollar"></i> Invoices</li>
+                <li class="nav-item"><i class="fas fa-receipt"></i> Receipts</li>
+                <li class="nav-item"><i class="fas fa-file-contract"></i> Contracts</li>
+                <li class="nav-item"><i class="fas fa-handshake"></i> Agreements</li>
+                <li class="nav-item"><i class="fas fa-chart-bar"></i> Reports</li>
+                <li class="nav-item"><i class="fas fa-coins"></i> Financial</li>
+                <li class="nav-item"><i class="fas fa-gavel"></i> Legal</li>
+                <li class="nav-item"><i class="fas fa-users"></i> HR</li>
+                <li class="nav-item"><i class="fas fa-image"></i> Images</li>
+                <li class="nav-item"><i class="fas fa-presentation"></i> Presentations</li>
+                <li class="nav-item"><i class="fas fa-table"></i> Spreadsheets</li>
+                <li class="nav-item"><i class="fas fa-envelope"></i> Letters</li>
+                <li class="nav-item"><i class="fas fa-file-alt"></i> Forms</li>
+                <li class="nav-item"><i class="fas fa-folder"></i> General</li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="toolbar">
+                <div class="breadcrumb" id="breadcrumb">
+                    <div class="breadcrumb-item">Home</div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="uploadBtn">
+                        <i class="fas fa-upload"></i> Upload
+                    </button>
+                    <button class="btn btn-success" id="newFolderBtn">
+                        <i class="fas fa-folder-plus"></i> New Folder
+                    </button>
+                </div>
+            </div>
+
+            <div class="file-grid" id="fileGrid"></div>
+
+            <div class="status-bar">
+                <span id="statusText">0 items</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Upload Files</div>
+                <button class="file-action-btn" id="closeUploadModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 50px; margin-bottom: 15px;"></i>
+                    <p>Drag & Drop Files Here</p>
+                    <p>or</p>
+                    <button class="btn btn-primary" id="browseFiles">Browse Files</button>
+                    <input type="file" class="file-input" id="fileInput" multiple>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancelUpload">Cancel</button>
+                <button class="btn btn-primary" id="confirmUpload">Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="folderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Create New Folder</div>
+                <button class="file-action-btn" id="closeFolderModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Folder Name</label>
+                    <input type="text" class="form-input" id="folderName" placeholder="e.g., Project Documents">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancelFolder">Cancel</button>
+                <button class="btn btn-primary" id="createFolder">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class FileManager {
+            constructor() {
+                this.files = [];
+                this.currentPath = ['Home'];
+                this.loadSampleData();
+            }
+
+            loadSampleData() {
+                this.files = [
+                    {id: 'folder-invoices', name: 'Invoices', type: 'folder', path: ['Home'], size: '-', modified: new Date().toLocaleDateString()},
+                    {id: 'folder-receipts', name: 'Receipts', type: 'folder', path: ['Home'], size: '-', modified: new Date().toLocaleDateString()},
+                    {id: 'folder-contracts', name: 'Contracts', type: 'folder', path: ['Home'], size: '-', modified: new Date().toLocaleDateString()},
+                    {id: 'folder-agreements', name: 'Agreements', type: 'folder', path: ['Home'], size: '-', modified: new Date().toLocaleDateString()},
+                    {id: 'folder-reports', name: 'Reports', type: 'folder', path: ['Home'], size: '-', modified: new Date().toLocaleDateString()},
+                    {id: 'folder-financial', name: 'Financial', type: 'folder', path: ['Home'], size: '-', modified: new Date().toLocaleDateString()},
+                    {id: 'folder-legal', name: 'Legal', type: 'folder', path: ['Home'], size: '-', modified: new Date().toLocaleDateString()},
+                    {id: 'folder-hr', name: 'HR', type: 'folder', path: ['Home'], size: '-', modified: new Date().toLocaleDateString()},
+                    {id: 'folder-images', name: 'Images', type: 'folder', path: ['Home'], size: '-', modified: new Date().toLocaleDateString()},
+                    {id: 'folder-presentations', name: 'Presentations', type: 'folder', path: ['Home'], size: '-', modified: new Date().toLocaleDateString()},
+                    {id: 'folder-spreadsheets', name: 'Spreadsheets', type: 'folder', path: ['Home'], size: '-', modified: new Date().toLocaleDateString()},
+                    {id: 'folder-letters', name: 'Letters', type: 'folder', path: ['Home'], size: '-', modified: new Date().toLocaleDateString()},
+                    {id: 'folder-forms', name: 'Forms', type: 'folder', path: ['Home'], size: '-', modified: new Date().toLocaleDateString()},
+                    {id: 'folder-general', name: 'General', type: 'folder', path: ['Home'], size: '-', modified: new Date().toLocaleDateString()},
+                    {id: 'file-' + Date.now(), name: 'Q1_Report.pdf', type: 'document', path: ['Home', 'Reports'], size: '2.4 MB', modified: new Date().toLocaleDateString()},
+                    {id: 'file-' + Date.now(), name: 'Invoice_001.pdf', type: 'document', path: ['Home', 'Invoices'], size: '1.2 MB', modified: new Date().toLocaleDateString()},
+                    {id: 'file-' + Date.now(), name: 'Contract_Agreement.docx', type: 'document', path: ['Home', 'Contracts'], size: '450 KB', modified: new Date().toLocaleDateString()},
+                    {id: 'file-' + Date.now(), name: 'Company_Logo.png', type: 'image', path: ['Home', 'Images'], size: '1.8 MB', modified: new Date().toLocaleDateString()},
+                    {id: 'file-' + Date.now(), name: 'Financial_Statement.xlsx', type: 'spreadsheet', path: ['Home', 'Financial'], size: '3.5 MB', modified: new Date().toLocaleDateString()},
+                    {id: 'file-' + Date.now(), name: 'Employee_Presentation.pptx', type: 'presentation', path: ['Home', 'Presentations'], size: '5.2 MB', modified: new Date().toLocaleDateString()}
+                ];
+            }
+
+            getCurrentFiles() {
+                return this.files.filter(file => 
+                    JSON.stringify(file.path) === JSON.stringify(this.currentPath)
+                );
+            }
+
+            navigateTo(path) {
+                this.currentPath = path;
+                this.render();
+            }
+
+            addFile(file) {
+                this.files.push(file);
+                this.render();
+            }
+
+            deleteFile(id) {
+                this.files = this.files.filter(file => file.id !== id);
+                this.render();
+            }
+
+            render() {
+                const fileGrid = document.getElementById('fileGrid');
+                fileGrid.innerHTML = '';
+                
+                const currentFiles = this.getCurrentFiles();
+                
+                if (currentFiles.length === 0) {
+                    fileGrid.innerHTML = '<div class="empty-folder"><i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 1.5rem;"></i><br>Empty Space Detected</div>';
+                } else {
+                    currentFiles.forEach(file => {
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'file-item';
+                        fileItem.dataset.id = file.id;
+                        
+                        let iconClass = 'document';
+                        let iconName = 'file';
+                        
+                        if (file.type === 'folder') {
+                            iconClass = 'folder';
+                            iconName = 'folder';
+                        } else if (file.type === 'image') {
+                            iconClass = 'image';
+                            iconName = 'file-image';
+                        } else if (file.type === 'spreadsheet') {
+                            iconClass = 'spreadsheet';
+                            iconName = 'file-excel';
+                        } else if (file.type === 'presentation') {
+                            iconClass = 'presentation';
+                            iconName = 'file-powerpoint';
+                        }
+                        
+                        fileItem.innerHTML = `
+                            <div class="file-icon ${iconClass}">
+                                <i class="fas fa-${iconName}"></i>
+                            </div>
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-info">${file.size} • ${file.modified}</div>
+                            <div class="file-actions">
+                                <button class="file-action-btn" data-action="download" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button class="file-action-btn" data-action="delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                        
+                        fileItem.addEventListener('click', (e) => {
+                            if (e.target.closest('.file-actions')) return;
+                            
+                            if (file.type === 'folder') {
+                                this.navigateTo([...file.path, file.name]);
+                            } else {
+                                alert(`Accessing: ${file.name}`);
+                            }
+                        });
+                        
+                        fileItem.querySelector('[data-action="download"]').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            alert(`Initiating Download: ${file.name}`);
+                        });
+                        
+                        fileItem.querySelector('[data-action="delete"]').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (confirm(`Delete "${file.name}" from system?`)) {
+                                this.deleteFile(file.id);
+                            }
+                        });
+                        
+                        fileGrid.appendChild(fileItem);
+                    });
+                }
+                
+                document.getElementById('statusText').textContent = 
+                    `${currentFiles.length} item${currentFiles.length !== 1 ? 's' : ''} detected`;
+                
+                this.updateBreadcrumb();
+            }
+
+            updateBreadcrumb() {
+                const breadcrumb = document.getElementById('breadcrumb');
+                breadcrumb.innerHTML = '';
+                
+                this.currentPath.forEach((folder, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'breadcrumb-item';
+                    item.textContent = folder;
+                    
+                    if (index < this.currentPath.length - 1) {
+                        item.addEventListener('click', () => {
+                            this.navigateTo(this.currentPath.slice(0, index + 1));
+                        });
+                    }
+                    
+                    breadcrumb.appendChild(item);
+                });
+            }
+        }
+
+        const fileManager = new FileManager();
+
+        const uploadBtn = document.getElementById('uploadBtn');
+        const newFolderBtn = document.getElementById('newFolderBtn');
+        const uploadModal = document.getElementById('uploadModal');
+        const closeUploadModal = document.getElementById('closeUploadModal');
+        const browseFiles = document.getElementById('browseFiles');
+        const fileInput = document.getElementById('fileInput');
+        const confirmUpload = document.getElementById('confirmUpload');
+        const cancelUpload = document.getElementById('cancelUpload');
+        const folderModal = document.getElementById('folderModal');
+        const closeFolderModal = document.getElementById('closeFolderModal');
+        const folderName = document.getElementById('folderName');
+        const createFolder = document.getElementById('createFolder');
+        const cancelFolder = document.getElementById('cancelFolder');
+        const uploadArea = document.getElementById('uploadArea');
+
+        function toggleModal(modalId, state) {
+            const modal = document.getElementById(modalId);
+            if (state) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('active'), 10);
+            } else {
+                modal.classList.remove('active');
+                setTimeout(() => modal.style.display = 'none', 400);
+            }
+        }
+
+        uploadBtn.addEventListener('click', () => toggleModal('uploadModal', true));
+        closeUploadModal.addEventListener('click', () => toggleModal('uploadModal', false));
+        cancelUpload.addEventListener('click', () => toggleModal('uploadModal', false));
+        
+        browseFiles.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                confirmUpload.disabled = false;
+                confirmUpload.style.animation = 'pulse 2s infinite';
+            }
+        });
+        
+        confirmUpload.addEventListener('click', () => {
+            if (fileInput.files.length > 0) {
+                Array.from(fileInput.files).forEach(file => {
+                    const fileType = getFileType(file);
+                    const size = formatFileSize(file.size);
+                    
+                    const newFile = {
+                        id: 'file-' + Date.now(),
+                        name: file.name,
+                        type: fileType,
+                        path: [...fileManager.currentPath],
+                        size: size,
+                        modified: new Date().toLocaleDateString()
+                    };
+                    
+                    fileManager.addFile(newFile);
+                });
+                
+                toggleModal('uploadModal', false);
+                fileInput.value = '';
+                confirmUpload.disabled = true;
+                confirmUpload.style.animation = 'none';
+            }
+        });
+        
+        newFolderBtn.addEventListener('click', () => {
+            toggleModal('folderModal', true);
+            folderName.focus();
+        });
+        
+        closeFolderModal.addEventListener('click', () => toggleModal('folderModal', false));
+        cancelFolder.addEventListener('click', () => toggleModal('folderModal', false));
+        
+        createFolder.addEventListener('click', () => {
+            const name = folderName.value.trim();
+            if (name) {
+                fileManager.addFile({
+                    id: 'folder-' + name.toLowerCase().replace(/\s+/g, '-'),
+                    name: name,
+                    type: 'folder',
+                    path: [...fileManager.currentPath],
+                    size: '-',
+                    modified: new Date().toLocaleDateString()
+                });
+                toggleModal('folderModal', false);
+                folderName.value = '';
+            }
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                confirmUpload.disabled = false;
+                confirmUpload.style.animation = 'pulse 2s infinite';
+            }
+        });
+
+        function getFileType(file) {
+            if (file.type.startsWith('image/')) return 'image';
+            if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv')) return 'spreadsheet';
+            if (file.name.endsWith('.pptx') || file.name.endsWith('.ppt')) return 'presentation';
+            if (file.name.endsWith('.pdf')) return 'document';
+            return 'document';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
+                const folderName = this.textContent.trim().split('\n')[0];
+                fileManager.navigateTo(['Home', folderName]);
+            });
+        });
+
+        fileManager.render();
+    </script>
+</body>
+</html>
