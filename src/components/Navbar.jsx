@@ -14,7 +14,6 @@ export default function Navbar() {
         <div className="nav-links">
           <Link to="/" className="nav-link">Home</Link>
           <a href="#features" className="nav-link">Features</a>
-          <a href="#pricing" className="nav-link">Pricing</a>
           <Link to="/app" className="btn btn-primary" style={{ marginLeft: '1rem' }}>
             Open Dashboard
           </Link>
