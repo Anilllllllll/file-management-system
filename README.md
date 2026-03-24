@@ -5,6 +5,10 @@
 The File Management System is a simple application that allows users to manage files and directories efficiently. The system supports basic file operations such as creating, deleting, reading, writing, and listing files. This project demonstrates file handling concepts and basic system design.
 
 ---
+<img width="1919" height="1102" alt="image" src="https://github.com/user-attachments/assets/9f599f7e-e76d-4d2d-92df-451adc87c985" />
+<img width="1919" height="1103" alt="image" src="https://github.com/user-attachments/assets/e55ab243-4bc0-43bf-9e18-e9b3f030da37" />
+
+
 
 ## 🚀 Features
 
